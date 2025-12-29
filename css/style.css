@@ -1,0 +1,37 @@
+/* Full-height chain for mobile layout */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+/* Leaflet map fills its parent */
+#map {
+  width: 100%;
+  height: 100%;
+}
+
+/* Dynamic viewport height on modern mobiles */
+@supports (height: 100dvh) {
+  #appRoot {
+    height: 100dvh;
+  }
+}
+
+/* Toast notification (if you want to show messages) */
+.toast {
+  position: fixed;
+  bottom: 5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 90%;
+  background: rgba(15, 23, 42, 0.96);
+  color: #e5e7eb;
+  padding: 0.5rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+  z-index: 9999;
+}
