@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <!-- Mobile-first viewport -->
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  />
+  <title>Live Geo-Snapper</title>
+
+  <!-- Tailwind CSS (mobile framework) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Custom font for app-like feel -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body
+  class="bg-slate-950 text-slate-50 overflow-hidden flex flex-col"
+  style="font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;"
+>
+  <!-- WELCOME OVERLAY -->
+  <div
+    id="welcomeOverlay"
+    class="fixed inset-0 z-[10000] bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950
+           flex flex-col items-center justify-center px-6 text-center transition-opacity duration-300"
+  >
+    <div class="max-w-xs space-y-4">
+      <div class="flex justify-center">
+        <div
+          class="h-14 w-14 rounded-2xl bg-emerald-500/10 border border-emerald-400/40
+                 flex items-center justify-center"
+        >
+          <span class="text-2xl">📍</span>
+        </div>
+      </div>
+      <h1 class="text-xl font-semibold tracking-tight">
+        Welcome to Live Geo‑Snapper
+      </h1>
+      <p class="text-[13px] text-slate-300">
+        This app needs your location to track your walk and pin photos on the map.
+        Your data is only used in this session and not stored permanently.
+      </p>
+      <button
+        id="startAppBtn"
+        type="button"
+        class="mt-2 w-full inline-flex items-center justify-center gap-2
+               rounded-full bg-emerald-500 text-slate-950 text-[13px] font-semibold
+               px-4 py-2 shadow-lg active:scale-95 hover:bg-emerald-400 transition"
+      >
+        <span class="text-sm">Allow GPS & Start</span>
+      </button>
+      <p class="text-[11px] text-slate-400">
+        Tip: For best accuracy, use this app outside or near a window.
+      </p>
+    </div>
+  </div>
+
+  <!-- HEADER (top app bar) -->
+  <header
+    class="h-11 flex items-center justify-between px-4 bg-slate-900/95 border-b border-slate-800
+           shrink-0 backdrop-blur"
+  >
+    <h1 class="text-sm font-semibold tracking-tight">Live Geo-Snapper</h1>
+    <span
+      id="statusBadge"
+      class="text-[11px] px-2 py-1 rounded-full bg-amber-500/20 text-amber-300 flex items-center gap-1"
+    >
+      <span
+        class="inline-block h-2 w-2 rounded-full bg-amber-300 animate-pulse"
+      ></span>
+      Waiting to start…
+    </span>
+  </header>
+
+  <!-- MAIN APP AREA: map + info -->
+  <div id="appRoot" class="flex-1 overflow-hidden flex flex-col">
+    <!-- MAP PANEL -->
+    <main id="mapPanel" class="relative flex-1">
+      <div id="map" class="w-full h-full"></div>
+
+      <!-- Current location card -->
+      <section
+        class="absolute left-4 right-4 bottom-24 md:bottom-28 bg-slate-900/95 rounded-2xl
+               border border-slate-700 px-3 py-2 text-[11px] shadow-xl
+               flex flex-col gap-1 max-w-md mx-auto"
+      >
+        <p class="font-semibold text-slate-100 flex items-center gap-1">
+          <span class="text-xs">📍</span>
+          Current Location
+        </p>
+        <p id="address" class="text-slate-300 line-clamp-2">
+          Tap “Allow GPS & Start” to begin tracking.
+        </p>
+        <p id="timestamp" class="text-slate-500">
+          Time: —
+        </p>
+        <div class="flex justify-end items-center gap-2 mt-1">
+          <div
+            id="locationAccuracy"
+            class="text-[10px] text-slate-400 hidden md:inline"
+          ></div>
+          <button
+            id="locateBtn"
+            class="px-2 py-1 rounded-full bg-slate-800 text-slate-100 text-[10px]
+                   hover:bg-slate-700 active:scale-95 transition"
+            type="button"
+          >
+            Re-center
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <!-- INFO PANEL (tab 2) -->
+    <section
+      id="infoPanel"
+      class="hidden flex-1 px-4 py-4 bg-slate-950 text-[12px] overflow-y-auto"
+    >
+      <div class="max-w-3xl mx-auto grid gap-4 md:grid-cols-2">
+        <div class="space-y-2">
+          <h2 class="text-sm font-semibold mb-1">About Live Geo-Snapper</h2>
+          <p>
+            This app tracks your current location in real-time and lets you pin
+            photos at your position on the map.
+          </p>
+          <p>
+            Current address:
+            <span id="infoAddress" class="text-emerald-300">
+              Waiting for GPS…
+            </span>
+          </p>
+        </div>
+        <div class="space-y-2">
+          <p class="text-slate-400">
+            Each capture drops a marker with the photo, address and time. You
+            can walk around campus and build your own mini photo map.
+          </p>
+          <p class="text-slate-400">
+            On tablets, this information panel uses a two-column layout so the
+            content stays neat and readable.
+          </p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- FLOATING CAPTURE BUTTON (FAB) -->
+  <button
+    id="captureBtn"
+    class="fixed left-1/2 -translate-x-1/2 bottom-20 md:bottom-24 px-6 py-2 rounded-full
+           bg-emerald-500 text-slate-950 text-sm font-semibold shadow-lg
+           border border-slate-900 active:scale-95 transition transform
+           hover:bg-emerald-400 flex items-center gap-2 z-[9999]"
+    type="button"
+  >
+    <span class="text-base">📸</span>
+    <span>Capture</span>
+  </button>
+
+  <!-- HIDDEN FILE INPUT FOR CAMERA -->
+  <input
+    id="captureInput"
+    type="file"
+    accept="image/*"
+    capture="environment"
+    class="hidden"
+  />
+
+  <!-- BOTTOM NAVIGATION BAR -->
+  <nav
+    class="h-12 bg-slate-900/95 border-t border-slate-800 flex items-center justify-around
+           text-[11px] shrink-0 backdrop-blur"
+  >
+    <button
+      id="tabMap"
+      class="flex flex-col items-center text-emerald-400 font-semibold px-4 py-1"
+      type="button"
+    >
+      <span class="text-lg">🗺️</span>
+      <span>Map</span>
+    </button>
+    <button
+      id="tabInfo"
+      class="flex flex-col items-center text-slate-400 px-4 py-1"
+      type="button"
+    >
+      <span class="text-lg">ℹ️</span>
+      <span>Info</span>
+    </button>
+  </nav>
+
+  <!-- Leaflet JS -->
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+
+  <!-- APP SCRIPTS -->
+  <script src="js/app.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/geolocation.js"></script>
+  <script src="js/camera.js"></script>
+</body>
+</html>
